@@ -7,9 +7,9 @@ import java.security.SecureRandom;
 public class PasswordUtils {
     private static final int PASSWORD_LENGTH = 12; // You can adjust the length as needed
     private static final String PASSWORD_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    public static String generatePassword() {
+    public static String generatePassword(String userName) {
         StringBuilder password = new StringBuilder();
-
+        password.append(userName);
         SecureRandom random = new SecureRandom();
         for (int i = 0; i < PASSWORD_LENGTH; i++) {
             int randomIndex = random.nextInt(PASSWORD_CHARACTERS.length());

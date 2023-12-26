@@ -3,7 +3,6 @@ package com.UserManagement.UserManagement.services;
 import com.UserManagement.UserManagement.model.User;
 import com.UserManagement.UserManagement.repository.UserRepository;
 import com.UserManagement.UserManagement.utils.PasswordUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,26 +15,41 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final EmailService emailService;
     private static final AtomicBoolean uniqueUserFlag = new AtomicBoolean(true);
 
-    @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, EmailService emailService) {
         this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
-    public User registerUser(String userName) {
+//    @Autowired
+//    public UserService(UserRepository userRepository, EmailService emailService) {
+//        this.userRepository = userRepository;
+//        this.emailService = emailService;
+//    }
+
+
+    public User registerUser(String userName,String email) {
         if (!isUniqueUserName(userName)) {
             throw new IllegalArgumentException("Username is not unique: " + userName);
         }
 
-        String password = PasswordUtils.generatePassword();
+        String password = PasswordUtils.generatePassword(userName);
         String encryptedPassword = PasswordUtils.hashPassword(password);
+
 
         User user = new User();
         user.setUserName(userName);
-        user.setPassword(encryptedPassword);
+        user.setEmail(email);
+        user.setPassword(password);
         user.setActive(true);
+
+        emailService.sendEmail(user);
+        user.setPassword(encryptedPassword);
+
         userRepository.save(user);
+
 
         // Log registration details
         System.out.println("User Registered: " + user);
@@ -43,11 +57,12 @@ public class UserService {
         return user;
     }
 
-    public void bulkRegisterUsers(List<String> userNames) {
-        ExecutorService executor = Executors.newFixedThreadPool(userNames.size());
+    public void bulkRegisterUsers(List<User> users) {
+        ExecutorService executor = Executors.newFixedThreadPool(users.size());
 
-        for (String userName : userNames) {
-            executor.submit(() -> registerUser(userName));
+        for (User user : users) {
+            executor.submit(() -> registerUser(user.getUserName(), user.getEmail()));
+
         }
 
         executor.shutdown();
@@ -58,6 +73,7 @@ public class UserService {
 
         if (existingUser != null) {
             existingUser.setPassword(PasswordUtils.hashPassword(updatedUser.getPassword()));
+            existingUser.setEmail(updatedUser.getEmail());
             userRepository.save(existingUser);
 
             // Log update details
@@ -66,6 +82,7 @@ public class UserService {
             throw new IllegalArgumentException("User not found for update: " + updatedUser.getUserName());
         }
     }
+
 
     public void deleteUser(String userName) {
         User existingUser = getUserByUserName(userName);
@@ -90,6 +107,6 @@ public class UserService {
 
     public Optional<User> getUserByPassword(String password) {
         String hashedEnteredPassword = PasswordUtils.hashPassword(password);
-        return  userRepository.findByPassword(password);
+        return  userRepository.findByPassword(hashedEnteredPassword);
     }
 }

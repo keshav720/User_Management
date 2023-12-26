@@ -13,10 +13,9 @@ public class User {
     @Id
     private String id;
     private String userName;
+    private String email;
     private String password;
     private boolean active;
 
-    public User(String userName, String encryptedPassword) {
-    }
 
 }

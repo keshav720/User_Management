@@ -1,3 +1,0 @@
-# MongoDB connection properties
-spring.data.mongodb.uri=mongodb://localhost:27017/UserManagement
-spring.data.mongodb.database=usermanagement
