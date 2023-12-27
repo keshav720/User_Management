@@ -18,4 +18,18 @@ public class User {
     private boolean active;
 
 
+    public User(String user1, String s) {
+        this.userName=user1;
+        this.email=s;
+    }
+
+    public User(String testUser, String newPassword, String s) {
+        this.userName=testUser;
+        this.password=newPassword;
+        this.email=s;
+    }
+
+    public User(String nonExistingUser) {
+        this.userName=nonExistingUser;
+    }
 }

@@ -8,15 +8,15 @@ public class PasswordUtils {
     private static final int PASSWORD_LENGTH = 12; // You can adjust the length as needed
     private static final String PASSWORD_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     public static String generatePassword(String userName) {
-        StringBuilder password = new StringBuilder();
-        password.append(userName);
+        StringBuilder password = new StringBuilder(userName);
         SecureRandom random = new SecureRandom();
         for (int i = 0; i < PASSWORD_LENGTH; i++) {
             int randomIndex = random.nextInt(PASSWORD_CHARACTERS.length());
             password.append(PASSWORD_CHARACTERS.charAt(randomIndex));
         }
-
-        return password.toString();
+        int maskLength = Math.min(password.length() / 2, 3);
+        return password.substring(0, maskLength) +
+                "*"+password.substring(maskLength,password.length());
     }
 
     public static String hashPassword(String password) {

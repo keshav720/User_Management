@@ -3,6 +3,7 @@ package com.UserManagement.UserManagement.services;
 import com.UserManagement.UserManagement.model.User;
 import com.UserManagement.UserManagement.repository.UserRepository;
 import com.UserManagement.UserManagement.utils.PasswordUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,16 +19,12 @@ public class UserService {
     private final EmailService emailService;
     private static final AtomicBoolean uniqueUserFlag = new AtomicBoolean(true);
 
+
+    @Autowired
     public UserService(UserRepository userRepository, EmailService emailService) {
         this.userRepository = userRepository;
         this.emailService = emailService;
     }
-
-//    @Autowired
-//    public UserService(UserRepository userRepository, EmailService emailService) {
-//        this.userRepository = userRepository;
-//        this.emailService = emailService;
-//    }
 
 
     public User registerUser(String userName,String email) {
@@ -36,17 +33,15 @@ public class UserService {
         }
 
         String password = PasswordUtils.generatePassword(userName);
-        String encryptedPassword = PasswordUtils.hashPassword(password);
-
+         String encryptedPassword = PasswordUtils.hashPassword(password);
 
         User user = new User();
         user.setUserName(userName);
         user.setEmail(email);
-        user.setPassword(password);
-        user.setActive(true);
-
-        emailService.sendEmail(user);
         user.setPassword(encryptedPassword);
+        user.setActive(true);
+        emailService.sendEmail(userName,email,password);
+
 
         userRepository.save(user);
 
@@ -101,7 +96,7 @@ public class UserService {
         return userRepository.findByUserName(userName).orElse(null);
     }
 
-    private boolean isUniqueUserName(String userName) {
+    boolean isUniqueUserName(String userName) {
         return userRepository.findByUserName(userName).isEmpty();
     }
 
